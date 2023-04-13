@@ -40,7 +40,7 @@ def print_all_folders():
         
         selected_folder_numbers = selected_folder_numbers.split(",")
         if len(selected_folder_numbers) > 3:
-            print("Cannot select more than 3 folders.")
+            print("Cannot select more than 3 folders.") # keep this at 3 to stop the other scripts working at this level
             continue
         selected_folders_copy = selected_folders.copy()
         for folder_number in selected_folder_numbers:

@@ -1,5 +1,5 @@
 # Replace "C:\path\to\pst\file.pst" with the actual path to your PST file
-$PSTFilePath = "C:\Users\Rory\Desktop\final.pst" # add in a varable to select which one you want to use
+$PSTFilePath = "C:\Users\$ENV:USER\Desktop\final.pst" # add in a varable to select which one you want to use
 
 
 $OutlookProfileName = "Outlook Profile"

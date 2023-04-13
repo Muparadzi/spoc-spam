@@ -96,12 +96,12 @@ def get_messages(folder_path):
     b = parts[2]
     c = parts[3]
 
-    folder = outlook.Folders.Item(a).Folders.Item(b).Folders.Item(c) # Modify this line to select the desired subfolder
+    folder = outlook.Folders.Item(a).Folders.Item(b).Folders.Item(c) # need to test this 
     messages = folder.Items
     message_info_list = []
     for message in messages:
         subject = message.Subject
-        body = message.body
+        body = message.body # test with the data for the task
         attachments = message.Attachments
 
         # Create separate folder for each message, exclude special characters

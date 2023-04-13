@@ -13,7 +13,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 
 # Define a function to retrieve messages from a specific subfolder
 def get_messages(folder_path):
-    folder = outlook.Folders.Item("Outlook Data File").Folders.Item("2023").Folders.Item("2023-01") # Modify this line to select the desired subfolder
+    folder = outlook.Folders.Item().Folders.Item().Folders.Item() # Modify this line to select the desired subfolder
     messages = folder.Items
     message_info_list = []
     for message in messages:
@@ -67,5 +67,5 @@ def get_messages(folder_path):
         json.dump(message_info_list, f)
 
 # Retrieve messages from the specified subfolder
-folder_path = r"\\Outlook Data File\2023\2023-01" # Modify this to select the desired subfolder
+folder_path = r"" # Modify this to select the desired subfolder
 get_messages(folder_path)
