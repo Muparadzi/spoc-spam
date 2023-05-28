@@ -77,8 +77,10 @@ print_all_folders()
 
 
 ## this is to be used for later scripts 
+# Added in to combat the error if "q" pressed to exit
+if "subfolder_location" in locals():
 
-print(subfolder_location)
+    print(subfolder_location)
 
 output_dir = Path.cwd() / "Output"
 output_dir.mkdir(parents=True, exist_ok=True)
@@ -149,8 +151,10 @@ def get_messages(folder_path):
     with open(output_dir / f"{re.sub('[^0-9a-zA-Z]+', '', folder.Name)}.json", "w") as f:
         json.dump(message_info_list, f)
 
-# Retrieve messages from the specified subfolder
-folder_path = subfolder_location # Modify this to select the desired subfolder
-get_messages(folder_path)
+# Added Error handling
 
-
+try :
+    folder_path = subfolder_location 
+    get_messages(folder_path)
+except NameError:
+    print("Exiting....")
