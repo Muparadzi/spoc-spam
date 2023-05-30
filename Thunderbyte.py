@@ -85,8 +85,19 @@ output_dir.mkdir(parents=True, exist_ok=True)
 
 # Define a function to retrieve messages from a specific subfolder
 def get_messages(folder_path):
-    folder_parts = folder_path.split("\\")
-    folder = outlook.Folders.Item(folder_parts[1]).Folders.Item(folder_parts[2]).Folders.Item(folder_parts[3])
+    path = folder_path
+    parts = path.split("\\")
+
+    # Retrieve the top-level folder
+    top_folder_name = parts[1]
+    folder = outlook.Folders.Item(top_folder_name)
+
+    # Traverse the remaining folder hierarchy
+    for folder_name in parts[2:]:
+        subfolders = folder.Folders
+        folder = subfolders.Item(folder_name)
+
+    # Retrieve the messages from the final folder
     messages = folder.Items
     all_message_info = []  # List to store all message metadata
 
