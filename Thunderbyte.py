@@ -7,6 +7,23 @@ import json
 
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 
+def check_pst_loaded():
+    for store in outlook.Stores:
+        if store.ExchangeStoreType == 3:  # 3 indicates PST store
+            return True
+
+    return False
+
+if check_pst_loaded():
+    print("PST found")
+    print("Continuing........")
+elif not check_pst_loaded():
+    print("Please load PST into outlook")
+    exit()
+else:
+    print("Unable to read outlook")
+    exit()
+
 def get_subfolders(selected_folder, folder, selected_folder_names, indent=0):
     subfolders = folder.Folders
     if folder.Name in selected_folder_names:
@@ -14,7 +31,6 @@ def get_subfolders(selected_folder, folder, selected_folder_names, indent=0):
         # Do something with the selected folder and its subfolders
         if folder == selected_folder:
             print("Selected folder:", folder.Name)
-            # ...
             if len(selected_folder_names) == 0:
                 return
             
@@ -97,7 +113,9 @@ def get_messages(folder_path):
     a = parts[1]
     b = parts[2]
     c = parts[3]
-
+    #print(a)
+    #print(b)
+    #print(c)
     folder = outlook.Folders.Item(a).Folders.Item(b).Folders.Item(c) # need to test this 
     messages = folder.Items
     message_info_list = []

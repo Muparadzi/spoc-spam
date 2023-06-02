@@ -1,7 +1,7 @@
 import win32com.client
 
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-
+subfolder_location =""
 def get_subfolders(selected_folder, folder, selected_folder_names, indent=0):
     subfolders = folder.Folders
     if folder.Name in selected_folder_names:
@@ -72,5 +72,5 @@ print_all_folders()
 
 
 ## this is to be used for later scripts as it provides a global variable to use
-
 print(subfolder_location)
+
