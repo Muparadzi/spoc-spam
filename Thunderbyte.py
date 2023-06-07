@@ -6,7 +6,7 @@ import os
 import json
 
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-
+# Checking for PST loaded into outlook
 def check_pst_loaded():
     for store in outlook.Stores:
         if store.ExchangeStoreType == 3:  # 3 indicates PST store
@@ -23,6 +23,8 @@ elif not check_pst_loaded():
 else:
     print("Unable to read outlook")
     exit()
+
+
 
 def get_subfolders(selected_folder, folder, selected_folder_names, indent=0):
     subfolders = folder.Folders
@@ -60,8 +62,8 @@ def print_all_folders():
             break
         
         selected_folder_numbers = selected_folder_numbers.split(",")
-        if len(selected_folder_numbers) > 3:
-            print("Cannot select more than 3 folders.")
+        if len(selected_folder_numbers) > 5: # test to see limit of script
+            print("Cannot select more than 5 folders.")
             continue
         selected_folders_copy = selected_folders.copy()
         for folder_number in selected_folder_numbers:
@@ -104,15 +106,19 @@ def get_messages(folder_path):
     path = folder_path
     parts = path.split("\\")
 
-    # Extract the individual parts
-    a = parts[1]
-    b = parts[2]
-    c = parts[3]
+    # Retrieve the top-level folder
+    top_folder_name = parts[1]
+    folder = outlook.Folders.Item(top_folder_name)
 
-    folder = outlook.Folders.Item(a).Folders.Item(b).Folders.Item(c) # need to test this 
+    # Traverse the remaining folder hierarchy
+    for folder_name in parts[2:]:
+        subfolders = folder.Folders
+        folder = subfolders.Item(folder_name)
+
+    # Retrieve the messages from the final folder
     messages = folder.Items
     all_message_info = []  # List to store all message metadata
-
+    
     def retrieve_msg_attachment_metadata(msg_attachment_path):
         # Implement your logic to retrieve metadata from .msg attachments
         # and return a dictionary containing the metadata
