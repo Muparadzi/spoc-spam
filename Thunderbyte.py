@@ -2,7 +2,7 @@ import win32com.client
 from pathlib import Path
 import re
 import hashlib
-import os 
+import os
 import json
 
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
@@ -91,11 +91,9 @@ def print_all_folders():
 
 print_all_folders()
 
-
 ## this is to be used for later scripts 
 # Added in to combat the error if "q" pressed to exit
 if "subfolder_location" in locals():
-
     print(subfolder_location)
 
 output_dir = Path.cwd() / "Output"
@@ -103,76 +101,100 @@ output_dir.mkdir(parents=True, exist_ok=True)
 
 # Define a function to retrieve messages from a specific subfolder
 def get_messages(folder_path):
-
     path = folder_path
-
-# Split the string using the backslash as the separator
     parts = path.split("\\")
 
     # Extract the individual parts
     a = parts[1]
     b = parts[2]
     c = parts[3]
-    #print(a)
-    #print(b)
-    #print(c)
+
     folder = outlook.Folders.Item(a).Folders.Item(b).Folders.Item(c) # need to test this 
     messages = folder.Items
-    message_info_list = []
+    all_message_info = []  # List to store all message metadata
+
+    def retrieve_msg_attachment_metadata(msg_attachment_path):
+        # Implement your logic to retrieve metadata from .msg attachments
+        # and return a dictionary containing the metadata
+        metadata = {
+            "subject": "Attachment Subject",
+            "body": "Attachment Body",
+            "attachments": []
+        }
+        return metadata
+
     for message in messages:
         subject = message.Subject
-        body = message.body # test with the data for the task
-        attachments = message.Attachments
+        body = message.body
 
         # Create separate folder for each message, exclude special characters
-        target_folder = output_dir / re.sub('[^0-9a-zA-Z]+', '', subject) 
+        target_folder = output_dir / re.sub('[^0-9a-zA-Z]+', '', subject)
         target_folder.mkdir(parents=True, exist_ok=True)
 
         # Create subfolder for attachments
         attachments_folder = target_folder / 'attachments'
         attachments_folder.mkdir(parents=True, exist_ok=True)
 
-        # Save attachments and exclude special characters in the filename
+        attachments = message.Attachments
         attachment_info_list = []
+
         for attachment in attachments:
             filename = re.sub('[^0-9a-zA-Z\.]+', '', attachment.FileName)
-            try:
-                attachment.SaveAsFile(attachments_folder / filename)
-            except:
-                pass
-            
-            # Calculate attachment hash
-            with open(attachments_folder / filename, 'rb') as f:
-                attachment_hash = hashlib.sha256(f.read()).hexdigest()
+            attachment_path = attachments_folder / filename
 
-            # Save attachment hash to JSON file
-            attachment_info = {
-                "filename": filename,
-                "hash": attachment_hash
-            }
+            if attachment_path.suffix.lower() == ".msg":
+                attachment_metadata = retrieve_msg_attachment_metadata(attachment_path)
+                if attachment_metadata is None:
+                    attachment_info = {
+                        "filename": filename,
+                        "hash": "",
+                        "subject": "",
+                        "body": "",
+                        "attachments": []
+                    }
+                else:
+                    attachment_info = {
+                        "filename": filename,
+                        "hash": attachment_metadata.get("hash", ""),
+                        "subject": attachment_metadata.get("subject", ""),
+                        "body": attachment_metadata.get("body", ""),
+                        "attachments": attachment_metadata.get("attachments", [])
+                    }
+            else:
+                try:
+                    attachment.SaveAsFile(str(attachment_path))
+                except:
+                    pass
+
+                with open(attachment_path, "rb") as f:
+                    attachment_hash = hashlib.sha256(f.read()).hexdigest()
+
+                attachment_info = {
+                    "filename": filename,
+                    "hash": attachment_hash
+                }
             attachment_info_list.append(attachment_info)
 
-            # Remove the original attachment file
-            os.remove(attachments_folder / filename)
-
-        # Save message metadata to JSON file, including body of the email
         message_info = {
             "subject": subject,
             "body": str(body),
             "attachments": attachment_info_list
         }
-        message_info_list.append(message_info)
-        with open(target_folder / "message_info.json", "w") as f:
-            json.dump(message_info, f)
+        all_message_info.append(message_info)
+
+    # Create the parent dictionary with the "emails" key and value as the list of message metadata
+    parent_dict = {
+        "emails": all_message_info
+    }
 
     # Save all message metadata to a single JSON file
-    with open(output_dir / f"{re.sub('[^0-9a-zA-Z]+', '', folder.Name)}.json", "w") as f:
-        json.dump(message_info_list, f)
+    with open(output_dir / "all_messages.json", "w") as f:
+        json.dump(parent_dict, f)
 
 # Added Error handling
 
-try :
-    folder_path = subfolder_location 
+try:
+    folder_path = subfolder_location
     get_messages(folder_path)
 except NameError:
     print("Exiting....")
