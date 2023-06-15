@@ -2,7 +2,7 @@ import win32com.client
 from pathlib import Path
 import re
 import hashlib
-import os
+#import os
 import json
 
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
@@ -53,8 +53,8 @@ def print_all_folders():
             print("Available subfolders:")
             for i, folder in enumerate(selected_folders[-1].Folders):
                 print(f"{i+1}. {folder.Name}")
-        selected_folder_numbers = input("Enter the number(s), a to save or q to exit: ")
-        if selected_folder_numbers.lower() == "a":
+        selected_folder_numbers = input("Enter the number(s), s to save or q to exit: ")
+        if selected_folder_numbers.lower() == "s":
             global subfolder_location
             subfolder_location = folder.FolderPath
             break
@@ -97,7 +97,7 @@ print_all_folders()
 # Added in to combat the error if "q" pressed to exit
 if "subfolder_location" in locals():
     print(subfolder_location)
-
+# This get the current working dir and make a folder called output
 output_dir = Path.cwd() / "Output"
 output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -111,6 +111,7 @@ def get_messages(folder_path):
     folder = outlook.Folders.Item(top_folder_name)
 
     # Traverse the remaining folder hierarchy
+    # This should read the full "folder" path from the outlook
     for folder_name in parts[2:]:
         subfolders = folder.Folders
         folder = subfolders.Item(folder_name)
@@ -194,12 +195,13 @@ def get_messages(folder_path):
     }
 
     # Save all message metadata to a single JSON file
-    with open(output_dir / "all_messages.json", "w") as f:
-        json.dump(parent_dict, f)
+    with open(output_dir / "all_messages.json", "w") as json_file:
+        json.dump(parent_dict, json_file)
 
 # Added Error handling
 
 try:
+    #This should fix the error if the script is exited before its complete
     folder_path = subfolder_location
     get_messages(folder_path)
 except NameError:
