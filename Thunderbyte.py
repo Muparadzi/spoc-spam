@@ -2,11 +2,23 @@ import win32com.client
 from pathlib import Path
 import re
 import hashlib
-#import os
+import os
 import json
+import win32ui
 
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 # Checking for PST loaded into outlook
+
+def outlook_running():
+    try:
+        win32ui.FindWindow(None, "Microsoft Outlook")
+        return True
+    except win32ui.error:
+        return False
+
+if not outlook_running():
+    os.startfile("outlook")
+    
 def check_pst_loaded():
     for store in outlook.Stores:
         if store.ExchangeStoreType == 3:  # 3 indicates PST store
@@ -23,8 +35,6 @@ elif not check_pst_loaded():
 else:
     print("Unable to read outlook")
     exit()
-
-
 
 def get_subfolders(selected_folder, folder, selected_folder_names, indent=0):
     subfolders = folder.Folders
