@@ -117,12 +117,13 @@ def get_messages(folder_path):
     parts = path.split("\\")
 
     # Retrieve the top-level folder
-    top_folder_name = parts[1]
+    top_folder_name = parts[2] # Check this number works for the values 
+    print(top_folder_name)
     folder = outlook.Folders.Item(top_folder_name)
 
     # Traverse the remaining folder hierarchy
     # This should read the full "folder" path from the outlook
-    for folder_name in parts[2:]:
+    for folder_name in parts[3:]: #
         subfolders = folder.Folders
         folder = subfolders.Item(folder_name)
 
