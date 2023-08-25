@@ -6,6 +6,8 @@ import fnmatch
 import email
 from extract_msg import Message
 import subprocess
+import calendar
+
 
 def calculate_hash(file_path):
     hash_object = hashlib.sha256()
@@ -109,8 +111,6 @@ def main():
         with open(email_file_path, "rb") as email_file:
             email_message = email.message_from_binary_file(email_file)
             email_info = extract_email_info(email_message, email_file_path)
-            # For debugging uncomment the line bellow 
-            #print(f"File: {email_file_path}, Sender: {email_info['Sender']}, Recipient: {email_info['Recipient']}, Subject: {email_info['Subject']}, Date: {email_info['Date']}, Hash: {email_info['Hash']}")
             extracted_data.append(email_info)
                 
     output_json_file = os.path.join(output_dir, "output.json")
@@ -129,6 +129,34 @@ def main():
         json.dump(full_output, json_file, indent=4)
     
     print("Data saved to", output_json_file)
+
+
+    if os.path.exists(output_json_file):
+        with open(output_json_file, "r") as json_file:
+            json_data = json.load(json_file)
+            if "extracted_data" in json_data:
+                first_email_date = json_data["extracted_data"][0]["Date"]
+                first_email_date_obj = datetime.strptime(first_email_date, "%Y-%m-%d %H:%M:%S")
+                year = first_email_date_obj.year
+                month_number = first_email_date_obj.month
+                month_name = calendar.month_name[month_number]
+                new_output_json_file = os.path.join(output_dir, f"{year:04d}-{month_name}-{month_number:02d}_output.json")
+
+                # Check if any other month is different
+                any_other_month_different = any(
+                    datetime.strptime(email_info["Date"], "%Y-%m-%d %H:%M:%S").month != month_number
+                    for email_info in json_data["extracted_data"][1:]
+                )
+
+                if any_other_month_different:
+                    print("Some of the months are different. Keeping the name as output.json")
+
+                elif os.path.exists(new_output_json_file):
+                    print(f"{new_output_json_file} already exists. Keeping the name as output.json")
+
+                else:
+                    os.rename(output_json_file, new_output_json_file)
+                    print(f"Renamed output.json to {new_output_json_file}")
 
 if __name__ == "__main__":
     main()
