@@ -1,0 +1,30 @@
+curl -X PUT "http://localhost:9200/email_data" -H "Content-Type: application/json" -d '
+{
+  "mappings": {
+    "properties": {
+      "Sender": {
+        "type": "text"
+      },
+      "Recipient": {
+        "type": "text"
+      },
+      "Subject": {
+        "type": "text"
+      },
+      "Date": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "Hash": {
+        "type": "text"
+      },
+      "Message Id": {
+        "type": "text"
+      },
+      "File Name": {
+        "type": "text"
+      }
+    }
+  }
+}'
+

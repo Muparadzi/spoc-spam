@@ -1,0 +1,86 @@
+steps 
+
+install the following 
+
+python3 
+pst-utils
+pip
+	extract_msg
+
+
+How to use 
+
+python3 extracted.py 
+
+python3 mapper.py 
+
+
+Next version 
+
+deeper into the extracted.py script to get into the attachments not just the name and hash more information and refine the information that this script gets.
+
+
+																Things to note
+
+				This is an example config file 
+
+input {
+  file {
+    path => "1000.eml"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+  }
+}
+
+filter {
+  json {
+    source => "email"
+  }
+
+  mutate {
+    add_field => {
+      "Sender" => "%{[extracted_data][0]["Sender"]}"
+      "Recipient" => "%{[extracted_data][0]["Recipient"]}"
+      "Subject" => "%{[extracted_data][0]["Subject"]}"
+      "Date" => "%{[extracted_data][0]["Date"]}"
+      "Hash" => "%{[extracted_data][0]["Hash"]}"
+      "Message Id" => "%{[extracted_data][0]["Message Id"]}"
+      "File Name" => "%{[extracted_data][0]["File Name"]}"
+    }
+  }
+}}
+
+output {{
+  elasticsearch {{
+    hosts => ["localhost:9200"]
+    index => "email_data"
+  }}
+  stdout {{}}
+}}
+
+
+
+				Example out.json file
+
+"metadata": {
+        "extraction_date": "",
+        "extracted_files_count":"",
+        "PST_Hash":""
+    },
+    "extracted_data": [
+        {
+            "Sender": "",
+            "Recipient": "",
+            "Subject": "",
+            "Date": "",
+            "Hash": "",
+            "Message Id": "",
+            "File Name": "",
+            "Attachments": [
+                {
+                    "Attachment Name": "",
+                    "Attachment Hash": ""
+                }
+            ]
+        }
+      ]
